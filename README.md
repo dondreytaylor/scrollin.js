@@ -19,7 +19,7 @@ Setting up Scrollin is as easy as including the following line
 in your code.
 
 ```javascript
-<script type="text/javascript" src="http://code.scrollinjs.com/v/1/scrollin.min.js" />
+<script type="text/javascript" src="//code.scrollinjs.com/scrollin.min.js" />
 ```
 
 If you are using Scrollin.js as a jQuery plugin, be sure to use the jQuery version
@@ -28,7 +28,7 @@ loaded prior to Scrollin.js.
 
 ```javascript
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" />
-<script type="text/javascript" src="//code.scrollinjs.com/scrollin.min.js" />
+<script type="text/javascript" src="//code.scrollinjs.com/scrollin.jquery.min.js" />
 ```
 
 ## Examples
@@ -151,13 +151,13 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript 
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     fetch:'../results.json'
 });
 
 // or
 
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     fetch: {url:"../results.json",cache:true,local:true}
 });
 ```
@@ -197,7 +197,7 @@ $('.selector').scrollin({
 
 ```javascript     
 // Template without Engine
-Scrollin.init({ 
+Scrollin.init( document.getElementById('#selector'), { 
     scID: 0,
     fetch: '../results.json',
     template: function(result,context) { 
@@ -207,7 +207,7 @@ Scrollin.init({
 
 
 // Template with Engine
-Scrollin.init({ 
+Scrollin.init( document.getElementById('#selector'), { 
     scID: 0,
     fetch: '../results.json',
     template: function(result,context) { 
@@ -250,7 +250,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Setting debug
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     debug: {console:true,cache:true}
@@ -281,7 +281,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     debug: {count:20,passOnRequest:30}
@@ -308,7 +308,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     dataToPass: function() { 
@@ -341,7 +341,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     scrollSpeed: {px:40}
@@ -367,7 +367,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     reverse: true
@@ -392,7 +392,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y'
@@ -469,7 +469,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -500,7 +500,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -529,7 +529,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -558,7 +558,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -603,7 +603,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -612,7 +612,7 @@ Scrollin.init({
 
 
 // Custom URL
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -653,7 +653,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -662,7 +662,7 @@ Scrollin.init({
 
 
 // Custom URL
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -702,7 +702,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -711,7 +711,7 @@ Scrollin.init({
 
 
 // Custom URL
-Scrollin.init({
+Scrollin.init( document.getElementById('#selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
