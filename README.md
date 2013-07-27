@@ -19,7 +19,7 @@ Setting up Scrollin is as easy as including the following line
 in your code.
 
 ```javascript
-<script type="text/javascript" src="http://code.scrollinjs.com/v/1/scrollin.min.js"></script>
+<script type="text/javascript" src="http://code.scrollinjs.com/v/1/scrollin.min.js" />
 ```
 
 If you are using Scrollin.js as a jQuery plugin, be sure to use the jQuery version
@@ -27,8 +27,8 @@ of Scrollin and include [JQuery](http://jQuery.com/ "jQuery") 1.9+, which **must
 loaded prior to Scrollin.js.
 
 ```javascript
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script type="text/javascript" src="//code.scrollinjs.com/scrollin.min.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" />
+<script type="text/javascript" src="//code.scrollinjs.com/scrollin.min.js" />
 ```
 
 ## Examples
@@ -135,29 +135,32 @@ For additional configuration the `fetch` option provides the following:
 + `local` - Local Storage caching of results
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        fetch:'../results.json'
-    });
 
-    // or
+```javascript    
+$('#selector').scrollin({
+    fetch:'../results.json'
+});
 
-    $('#selector').scrollin({
-        fetch: {url:"../results.json",cache:true,local:true}
-    });
+// or
+
+$('#selector').scrollin({
+    fetch: {url:"../results.json",cache:true,local:true}
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        fetch:'../results.json'
-    });
 
-    // or
+```javascript 
+Scrollin.init({
+    fetch:'../results.json'
+});
 
-    Scrollin.init({
-        fetch: {url:"../results.json",cache:true,local:true}
-    });
+// or
 
+Scrollin.init({
+    fetch: {url:"../results.json",cache:true,local:true}
+});
+```
 
 
 
@@ -167,50 +170,52 @@ The template will be used to render each of the results passed back. The templat
 or precompiled template if a `templateEngine` is specified. If a template is not specified each result will be assumed to be markup and contained within a `div` element (e.g. `<div>result markup</div>`)
 
 ##### JQuery
-    
-    // Template without Engine
-    $('.selector').scrollin({ 
-        scID: 0,
-        fetch: '../results.json',
-        template: function(result,context) { 
-            return "<li><img src='"+result.src+"' title='"+result.title+"' /></li>"; 
-        },
-    });
+
+```javascript     
+// Template without Engine
+$('.selector').scrollin({ 
+    scID: 0,
+    fetch: '../results.json',
+    template: function(result,context) { 
+        return "<li><img src='"+result.src+"' title='"+result.title+"' /></li>"; 
+    },
+});
 
 
-    // Template with Engine
-    $('.selector').scrollin({ 
-        scID: 0,
-        fetch: '../results.json',
-        template: function(result,context) { 
-            return "<li><img src='{{result.src}}' title='{{result.title}}' /></li>"; 
-        },
-        templateEngine: Hogan 
-    });
-
+// Template with Engine
+$('.selector').scrollin({ 
+    scID: 0,
+    fetch: '../results.json',
+    template: function(result,context) { 
+        return "<li><img src='{{result.src}}' title='{{result.title}}' /></li>"; 
+    },
+    templateEngine: Hogan 
+});
+```
 
 ##### Javascript
-    
-    // Template without Engine
-    Scrollin.init({ 
-        scID: 0,
-        fetch: '../results.json',
-        template: function(result,context) { 
-            return "<li><img src='"+result.src+"' title='"+result.title+"' /></li>"; 
-        },
-    });
+
+```javascript     
+// Template without Engine
+Scrollin.init({ 
+    scID: 0,
+    fetch: '../results.json',
+    template: function(result,context) { 
+        return "<li><img src='"+result.src+"' title='"+result.title+"' /></li>"; 
+    },
+});
 
 
-    // Template with Engine
-    Scrollin.init({ 
-        scID: 0,
-        fetch: '../results.json',
-        template: function(result,context) { 
-            return "<li><img src='{{result.src}}' title='{{result.title}}' /></li>"; 
-        },
-        templateEngine: Hogan 
-    });    
-
+// Template with Engine
+Scrollin.init({ 
+    scID: 0,
+    fetch: '../results.json',
+    template: function(result,context) { 
+        return "<li><img src='{{result.src}}' title='{{result.title}}' /></li>"; 
+    },
+    templateEngine: Hogan 
+});    
+```
 
 
 ### Debug
@@ -224,31 +229,33 @@ For additional configuration the `debug` option provides the following:
 
 
 ##### JQuery
-    
-    // Setting debug
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        debug: true
-    });
 
-    // Setting additional options
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        debug: {console:true,cache:true}
-    });
+```javascript     
+// Setting debug
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    debug: true
+});
 
+// Setting additional options
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    debug: {console:true,cache:true}
+});
+```
 
 ##### Javascript
-    
-    // Setting debug
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        debug: {console:true,cache:true}
-    });
 
+```javascript     
+// Setting debug
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    debug: {console:true,cache:true}
+});
+```
 
 
 
@@ -262,21 +269,24 @@ For additional configuration the `debug` option provides the following:
 + `passOnRequest` - Determines whether append the limit value on each request to `fetch` results.
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        limit: 20
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    limit: 20
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        debug: {count:20,passOnRequest:30}
-    });
+
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    debug: {count:20,passOnRequest:30}
+});
+```
 
 ### DataToPass
 
@@ -284,26 +294,28 @@ The data to be passed on each `fetch` for results. An Object or function returni
 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        dataToPass: function() { 
-            return {whatsup:"API"};
-        }
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    dataToPass: function() { 
+        return {whatsup:"API"};
+    }
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        dataToPass: function() { 
-            return {whatsup:"API"};
-        }
-    });
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    dataToPass: function() { 
+        return {whatsup:"API"};
+    }
+});
+```
 
 
 ### ScrollSpeed
@@ -317,22 +329,24 @@ For additional configuration the `scrollSpeed` option provides the following:
 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        scrollSpeed: 'fast'
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    scrollSpeed: 'fast'
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        scrollSpeed: {px:40}
-    });
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    scrollSpeed: {px:40}
+});
+```
 
 
 ### Reverse
@@ -341,22 +355,24 @@ Adds results opposite the default axis direction. If the axis is horizontal resu
 prepended opposite bottom. If the axis is vertical results will be prepended opposite right.
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        reverse: true
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    reverse: true
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        reverse: true
-    });  
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    reverse: true
+});  
+```
 
 ### Axis
 
@@ -364,22 +380,24 @@ The `axis` option specifies the direction that the end-user will be scrolling in
 `y` (top,bottom).
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'x'
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'x'
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y'
-    });  
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y'
+});  
+```
 
 ### Animate
 
@@ -398,36 +416,37 @@ For additional configuration the `animate` option provides the following:
 
 
 ##### JQuery
-    
-    // Animate w/ defaults
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        animate: true
-    });
 
-    
-    // Animate w/ settings
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        animate: { 
-            speed:50,
-            delay:10
+```javascript     
+// Animate w/ defaults
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    animate: true
+});
+
+
+// Animate w/ settings
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    animate: { 
+        speed:50,
+        delay:10
+    }
+});
+
+// Custom Animation
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    animate: {
+        custom: function(result,context) {
+            return result.animate({opacity:1});  
         }
-    });
-
-    // Custom Animation
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        animate: {
-            custom: function(result,context) {
-                return result.animate({opacity:1});  
-            }
-        }
-    });
-
+    }
+});
+```
 
 ### Loading
 
@@ -435,28 +454,30 @@ If results are not ready to be appended/prepended, a loading image will display 
 of the end-users scroll. 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        loading: { 
-            img: '../loading.gif'
-        }
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    loading: { 
+        img: '../loading.gif'
+    }
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        loading: { 
-            img: '../loading.gif'
-        }
-    }); 
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    loading: { 
+        img: '../loading.gif'
+    }
+}); 
+```
 
 ### Done
 
@@ -464,28 +485,30 @@ If there is no more reults to display, and image or text will appear in the dire
 end-users scroll. 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        done: { 
-            text: 'You have reached the end.'
-        }
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    done: { 
+        text: 'You have reached the end.'
+    }
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        done: { 
-            text: 'You have reached the end.'
-        }
-    }); 
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    done: { 
+        text: 'You have reached the end.'
+    }
+}); 
+```
 
 ### FillOnLoad
 
@@ -493,55 +516,58 @@ Results will fill the scroll target element until the content is equal to or exc
 the scroll target. 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        fillOnLoad: true
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    fillOnLoad: true
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        fillOnLoad: true
-    }); 
 
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    fillOnLoad: true
+}); 
+```
 
 ### Data
 
 Pass data between handlers using the `data` option. 
 
 ##### JQuery
-    
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        data: {messaage:"A message to send each handler"},
-        onBeforeFetch(dataToPass,context) {
-            console.log(context.message); 
-        }
-    });
 
+```javascript     
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    data: {messaage:"A message to send each handler"},
+    onBeforeFetch(dataToPass,context) {
+        console.log(context.message); 
+    }
+});
+```
 
 ##### Javascript
-    
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        data: {messaage:"A message to send each handler"},
-        onBeforeFetch(dataToPass,context) {
-            console.log(context.message); 
-        }
-    }); 
 
-
+```javascript     
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    data: {messaage:"A message to send each handler"},
+    onBeforeFetch(dataToPass,context) {
+        console.log(context.message); 
+    }
+}); 
+```
 
 ### UpdateURL
 
@@ -551,95 +577,100 @@ when the first element of that page first becomes visible in the scroll target.
 
 
 ##### JQuery
-    
-    // Default (i.e /page/<number>)
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: true
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: true
+});
 
 
-    // Custom URL
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: function(pattern,context) {
-             return '/page/'+context.states.pageNumber; 
-        }
-    });
-
+// Custom URL
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: function(pattern,context) {
+         return '/page/'+context.states.pageNumber; 
+    }
+});
+```
 
 ##### Javascript
-    
-    // Default (i.e /page/<number>)
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: true
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: true
+});
 
 
-    // Custom URL
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: function(pattern,context) {
-             return '/page/'+context.states.pageNumber; 
-        }
-    });
+// Custom URL
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: function(pattern,context) {
+         return '/page/'+context.states.pageNumber; 
+    }
+});
+```
 
 ### ResultsHolder
 
 The results holder is the element to append/prepend results to. By default the `resultsHolder` is the `scrollTarget`.
 
 ##### JQuery
-    
-    // Default (i.e /page/<number>)
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        results
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    results
+});
 
 
-    // Custom URL
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: function(pattern,context) {
-             return '/page/'+context.states.pageNumber; 
-        }
-    });
-
+// Custom URL
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: function(pattern,context) {
+         return '/page/'+context.states.pageNumber; 
+    }
+});
+```
 
 ##### Javascript
-    
-    // Default (i.e /page/<number>)
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: true
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: true
+});
 
 
-    // Custom URL
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        updateURL: function(pattern,context) {
-             return '/page/'+context.states.pageNumber; 
-        }
-    });
-
+// Custom URL
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    updateURL: function(pattern,context) {
+         return '/page/'+context.states.pageNumber; 
+    }
+});
+```
 
 
 ### ResultDataAtrr
@@ -647,40 +678,43 @@ The results holder is the element to append/prepend results to. By default the `
 Scrollin will add attributes to each individual result which can be enabled or disabled.
 
 ##### JQuery
-    
-    // Default (i.e /page/<number>)
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        resultDataAtr: false
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    resultDataAtr: false
+});
 
 
-    // Custom URL
-    $('#selector').scrollin({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        resultDataAtrr: false
-    });
-
+// Custom URL
+$('#selector').scrollin({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    resultDataAtrr: false
+});
+```
 
 ##### Javascript
-    
-    // Default (i.e /page/<number>)
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        resultDataAtrr: false
-    });
+
+```javascript     
+// Default (i.e /page/<number>)
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    resultDataAtrr: false
+});
 
 
-    // Custom URL
-    Scrollin.init({
-        scID: 0,
-        fetch: '../results.json',
-        axis: 'y',
-        resultDataAtrr: false
-    });
+// Custom URL
+Scrollin.init({
+    scID: 0,
+    fetch: '../results.json',
+    axis: 'y',
+    resultDataAtrr: false
+});
+```
