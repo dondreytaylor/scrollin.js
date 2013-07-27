@@ -19,16 +19,17 @@ Setting up Scrollin is as easy as including the following line
 in your code.
 
 ```javascript
-<script type="text/javascript" src=""></script>
+<script type="text/javascript" src="http://code.scrollinjs.com/v/1/scrollin.min.js"></script>
 ```
 
 If you are using Scrollin.js as a jQuery plugin, be sure to use the jQuery version
 of Scrollin and include [JQuery](http://jQuery.com/ "jQuery") 1.9+, which **must** be
 loaded prior to Scrollin.js.
 
-    <script type="text/javascript" src=""></script>
-    <script type="text/javascript" src=""></script>
-
+```javascript
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript" src="//code.scrollinjs.com/scrollin.min.js"></script>
+```
 
 ## Examples
 
@@ -62,17 +63,19 @@ Scrollin where to fetch the results from.
 
 ##### JQuery
 
-    $('#selector').scrollin({
-        fetch: '../results.json'
-    });
-
+```javascript
+$('#selector').scrollin({
+    fetch: '../results.json'
+});
+```
 
 ##### Javascript
 
-    Scrollin.init( document.getElementById('#selector'), { 
-        fetch: '../results.json'  
-    }); 
-
+```javascript
+Scrollin.init( document.getElementById('#selector'), { 
+    fetch: '../results.json'  
+}); 
+```
 
 
 
@@ -85,25 +88,30 @@ Used to reference any instance of Scrollin being used. To retrieve an instance
 use the `i` function with the `scID` value passed in. 
 
 ##### JQuery
-    
-    // Setting ID
-    $('#selector').scrollin({
-        scID:1
-    });
 
-    // Retrieving instance
-    Scrollin.i(1) 
+```javascript    
+// Setting ID
+$('#selector').scrollin({
+    scID:1
+});
+
+
+// Retrieving instance
+Scrollin.i(1) 
+```
 
 ##### Javascript
-    
-    // Setting ID
-    Scrollin.init( document.getElementById('#selector'), { 
-       scID:1
-    }); 
 
-    // Retrieving instance
-    Scrollin.i(1)
+```javascript    
+// Setting ID
+Scrollin.init( document.getElementById('#selector'), { 
+   scID:1
+}); 
 
+
+// Retrieving instance
+Scrollin.i(1)
+```
 
 
 
