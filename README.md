@@ -18,7 +18,9 @@ Flipboard, and Flickr to name the most popular.
 Setting up Scrollin is as easy as including the following line
 in your code.
 
-    <script type="text/javascript" src=""></script>
+```javascript
+<script type="text/javascript" src=""></script>
+```
 
 If you are using Scrollin.js as a jQuery plugin, be sure to use the jQuery version
 of Scrollin and include [JQuery](http://jQuery.com/ "jQuery") 1.9+, which **must** be
