@@ -72,7 +72,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript
-Scrollin.init( document.getElementById('#selector'), { 
+Scrollin.init( document.getElementById('selector'), { 
     fetch: '../results.json'  
 }); 
 ```
@@ -104,7 +104,7 @@ Scrollin.i(1)
 
 ```javascript    
 // Setting ID
-Scrollin.init( document.getElementById('#selector'), { 
+Scrollin.init( document.getElementById('selector'), { 
    scID:1
 }); 
 
@@ -120,7 +120,8 @@ Scrollin.i(1)
 The remote path containing the data to be fetched. Scrollin will first try to fetch
 from `local` storage and `cache` depending if enabled, and only if both are unable to provide
 results will a request be made. Scrollin reduces the amount of requests sent out at a given time by 
-limiting the amount of active requests. 
+limiting the amount of active requests. Each request made will pass along what page the end-user is
+requesting (i.e. appending page=x to each request made)
 
 For additional configuration the `fetch` option provides the following: 
 
@@ -151,13 +152,13 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript 
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     fetch:'../results.json'
 });
 
 // or
 
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     fetch: {url:"../results.json",cache:true,local:true}
 });
 ```
@@ -197,7 +198,7 @@ $('.selector').scrollin({
 
 ```javascript     
 // Template without Engine
-Scrollin.init( document.getElementById('#selector'), { 
+Scrollin.init( document.getElementById('selector'), { 
     scID: 0,
     fetch: '../results.json',
     template: function(result,context) { 
@@ -207,7 +208,7 @@ Scrollin.init( document.getElementById('#selector'), {
 
 
 // Template with Engine
-Scrollin.init( document.getElementById('#selector'), { 
+Scrollin.init( document.getElementById('selector'), { 
     scID: 0,
     fetch: '../results.json',
     template: function(result,context) { 
@@ -250,7 +251,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Setting debug
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     debug: {console:true,cache:true}
@@ -281,7 +282,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     debug: {count:20,passOnRequest:30}
@@ -308,7 +309,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     dataToPass: function() { 
@@ -341,7 +342,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     scrollSpeed: {px:40}
@@ -367,7 +368,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     reverse: true
@@ -392,7 +393,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y'
@@ -469,7 +470,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -500,7 +501,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -529,7 +530,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -558,7 +559,7 @@ $('#selector').scrollin({
 ##### Javascript
 
 ```javascript     
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -603,7 +604,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -612,7 +613,7 @@ Scrollin.init( document.getElementById('#selector'), {
 
 
 // Custom URL
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -653,7 +654,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -662,7 +663,7 @@ Scrollin.init( document.getElementById('#selector'), {
 
 
 // Custom URL
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -702,7 +703,7 @@ $('#selector').scrollin({
 
 ```javascript     
 // Default (i.e /page/<number>)
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',
@@ -711,7 +712,7 @@ Scrollin.init( document.getElementById('#selector'), {
 
 
 // Custom URL
-Scrollin.init( document.getElementById('#selector'), {
+Scrollin.init( document.getElementById('selector'), {
     scID: 0,
     fetch: '../results.json',
     axis: 'y',

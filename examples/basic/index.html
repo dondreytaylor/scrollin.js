@@ -1,0 +1,132 @@
+<html>
+	<head>
+		<style>
+			*, *:before, *:after {
+			  -moz-box-sizing: border-box; 
+			  -webkit-box-sizing: border-box; 
+			  box-sizing: border-box;
+			}
+			html,body { 
+			 	overflow: hidden; 
+			 }
+			.viewport { 
+				width: 500px; 
+				height: 500px; 
+				border:1px solid #ddd; 
+				overflow-y: auto; 
+				margin-bottom:20px; 
+			}
+			.debug { 
+				padding: 10px; 
+				width: 500px; 
+				height: 300px; 
+				border:1px solid #ddd; 
+				overflow-y: auto; 
+			}
+			.debug > ul > li { 
+				list-style-type: none;
+				border-bottom: 1px solid #ddd;
+				padding:5px 0px; 
+			}
+			#results .result { 
+				list-style-type: none; 
+				width: 50px; 
+				height:50px; 
+				background: green; 
+				margin-bottom: 10px; 
+			}
+
+			.semitvisible { 
+				opacity: .3;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="viewport viewport1 ">
+			<ul id="results">
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+				<li class="result semitvisible"></li>
+			</ul>
+		</div>
+		<div class="debug">
+			<ul></ul>
+		</div>
+		<a href="javascript:void(0);" class="debug-button">Clear Debug</a>
+		<script type="text/javascript" src="jquery-1.7.1.js" ></script>
+		<script type="text/javascript" src="../../scrollin.jquery.js" ></script>
+		<script type="text/javascript"> 
+			$(function() { 
+				"use strict" 
+
+				var $debug = $('.debug'); 
+				var $viewport = $('.viewport'); 
+				var $debugClearButton = $('.debug-button'); 
+				var clearDebug = function() {
+
+					$debug.children('ul').children().remove(); 
+				}; 
+				var addToDebugConsole = function(text) {
+					
+					$debug.children('ul').append($('<li>'+text+'</li>')); 
+				}; 
+				
+				$debugClearButton.on('click',clearDebug); 
+				
+				$viewport.on('scrollin:initialized',function() { 
+					addToDebugConsole('Scrollin has been initialized');
+				}); 
+
+				$viewport.on('scrollin:scrolling',function() { 
+					addToDebugConsole('We are currently scrolling now'); 
+				}); 
+
+				$viewport.scrollin({
+					fetch:'../results.json',
+					// handlers: { 
+					// 	onScrolling: function( scInstance, event ) {
+					// 		addToDebugConsole('Velocity: '+scInstance.metrics.scrollTarget.velocity);
+					// 	}
+					// }
+				});
+
+				
+
+
+			}); 
+		</script> 
+	</body>
+</html>
