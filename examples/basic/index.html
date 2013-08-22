@@ -115,12 +115,13 @@
 				}); 
 
 				$viewport.scrollin({
-					fetch:'../results.json',
-					// handlers: { 
-					// 	onScrolling: function( scInstance, event ) {
-					// 		addToDebugConsole('Velocity: '+scInstance.metrics.scrollTarget.velocity);
-					// 	}
-					// }
+					fetch: {url:'../results.json',dataType:'jsonp'},
+					handlers: { 
+						onScrolling: function( scInstance, event ) {
+							console.log(scInstance.options);
+							//addToDebugConsole('Velocity: '+scInstance.metrics.scrollTarget.velocity);
+						}
+					}
 				});
 
 				

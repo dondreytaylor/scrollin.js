@@ -83,6 +83,99 @@
 				catch(e) {}
 			};
 			return false;
+		},
+		sendXHRRequest: function( url, method, sync, data, callback ) {
+
+			var xhr;  
+          	var i; 
+          	var readyStateHandler;
+          	var callbackSet;
+          	var methods = ['GET','PUT','POST','DELETE'];
+
+          	if(typeof XMLHttpRequest !== 'undefined')
+        	{
+				 xhr = new XMLHttpRequest();  
+        	}
+        	else 
+        	{  
+            	var versions = [
+            		"MSXML2.XmlHttp.5.0",   
+                    "MSXML2.XmlHttp.4.0",  
+                    "MSXML2.XmlHttp.3.0",   
+                    "MSXML2.XmlHttp.2.0",  
+                    "Microsoft.XmlHttp"
+                ]  
+  
+	            for(var i = 0, len = versions.length; i < len; i++) 
+	            {  
+	                try 
+	                {  
+	                    xhr = new ActiveXObject(versions[i]);  
+	                    break;  
+	                }  
+	                catch(e)
+	                {
+
+	                }  
+	            }  
+	        }  
+          
+        	
+        	// Check arguments
+        	url    = typeof url === 'string' ? url : '';
+        	sync   = typeof sync === 'boolean' ?  sync : true;
+        	data   = typeof data === 'string' ? data : ''; 
+        	method = typeof method === 'string' ? method : ''; 
+        	callbackSet = typeof callback === 'function' ? true : false;
+        	method = methods.join(',').indexOf(method) > -1 ? method : 'GET';
+
+          
+	        readyStateHandler = function() 
+	        {
+	        	/**
+		         * 0: uninitialized
+				 * 1: loading
+				 * 2: loaded
+				 * 3: interactive
+				 * 4: complete
+				 **/  
+
+	            if(xhr.readyState < 4) 
+	            {  
+	                return;  
+	            }  
+	              
+	            if(xhr.status !== 200) 
+	            {  
+	                return;  
+	            }  
+	  	
+	  			// Success
+	            if(xhr.readyState === 4) 
+	            {  
+	                callback(xhr);  
+	            }             
+	        }  
+	        
+
+
+	        if (!sync) 
+	        {
+	        	xhr.onreadystatechange = readyStateHandler;  
+	        }
+
+	        xhr.open(method, url, !sync);  
+	        xhr.send(data);
+
+	        return this;   
+		},
+		sendJSONP: function( url ) {
+			if (typeof url === 'string') { 
+				var script = document.createElement("script");
+				script.src = url;
+				document.body.appendChild(script); 
+			}
+			return this;
 		}		
 	};
 	/////////////////////////////////////
@@ -92,6 +185,7 @@
 	var Scrollin = (function( elem, options ) {
 		
 		var handlers; 
+		var defaults;
 		var initializedEvent; 
 
 		if ( !( this instanceof Scrollin ) ) { 
@@ -121,7 +215,7 @@
 		    onPageLeaveView: { overridable: true, stack: [] }  
 		};
 
-		this.defaults  = {
+		defaults  = {
 			scID: (instances.length+1),    // - used as identifier
 		    template: "", 			       // - markup for new elements
 		    templateEngine: "", 	       // - engine used for markup
@@ -180,7 +274,7 @@
 		}; 
  		
  		this.elements = Helpers.makeArray( elem ); 
-		this.options  = Helpers.extend( this.defaults, options);
+		this.options  = Helpers.extend( defaults, options);
 		this.events   = { 
 			initialized: new Event('scrollin:initialized'),
 			scrolling:   new Event('scrollin:scrolling'),
@@ -196,7 +290,7 @@
 		}
 	
 		this.updateMetrics().bindHandlers();
-		this.elements[0].dispatchEvent(this.events.onInitialized);
+		this.elements[0].dispatchEvent(this.events.initialized);
 	});
 	
 	/* ------- Index --------*/ 
@@ -236,7 +330,12 @@
 			this.metrics.scrollTarget.offset.top  = this.elements[0].offsetTop;
 			this.metrics.scrollTarget.offset.left = this.elements[0].offsetLeft;
 			this.metrics.scrollTarget.scroll.height = this.elements[0].scrollHeight;
+			this.metrics.scrollTarget.scroll.scrollTop = this.elements[0].scrollTop;
+			this.metrics.scrollTarget.scroll.scrollLeft = this.elements[0].scrollLeft;
+			this.metrics.scrollTarget.scroll.percentScrolledY = (this.elements[0].scrollTop) / (this.elements[0].scrollHeight - this.metrics.scrollTarget.height); 
+			this.metrics.scrollTarget.scroll.percentScrolledX = (this.elements[0].scrollLeft) / (this.elements[0].scrollWidth - this.metrics.scrollTarget.width); 
 			this.metrics.scrollTarget.lastUpdated = (new Date()).getTime();
+			
 			
 		}
 		return this;
@@ -293,8 +392,8 @@
 		}
 	}; 
 
-	Scrollin.prototype.onScrolling = function( scInstance, event ) {
-		scInstance.updateScrollVelocity().updateResultsHolderMetrics().updateMetrics();
+	Scrollin.prototype.onScrolling = function( scInstance, event ) { scInstance.fetch();
+		scInstance.updateScrollVelocity().updateMetrics();
 		scInstance.elements[0].dispatchEvent(scInstance.events.scrolling);
 	}; 
 
@@ -304,14 +403,16 @@
 
 	/* ------ Fetching Logic ------ */
 	Scrollin.prototype.fetch = function() { 
-	}; 
-	
-	Scrollin.prototype.fetchSuccess = function() { 
-	}; 
-	
-	Scrollin.prototype.fetchFailure = function() { 
-	}; 
+		Helpers.sendJSONP('http://dondrey.devo.purzue.com/rest/xsrf/Test?action=test?callback=test&return_as=JSONP');
+	};
 
+	Scrollin.prototype.remoteFetch = function() { 
+		Helpers.sendXHRRequest( 'http://google.com', 'GET', false, '' , function() 
+		{
+			console.log('Yes');
+		});
+	}; 
+	
 	Scrollin.prototype.cacheFetch = function( response, pageNumber ) { 
 	}; 
 
