@@ -30,9 +30,9 @@
 			}
 			#results .result { 
 				list-style-type: none; 
-				width: 50px; 
-				height:50px; 
-				background: green; 
+				min-width: 50px; 
+				min-height:50px; 
+				/*background: green; */
 				margin-bottom: 10px; 
 			}
 
@@ -44,42 +44,6 @@
 	<body>
 		<div class="viewport viewport1 ">
 			<ul id="results">
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
-				<li class="result semitvisible"></li>
 			</ul>
 		</div>
 		<div class="debug">
@@ -110,16 +74,16 @@
 					addToDebugConsole('Scrollin has been initialized');
 				}); 
 
-				$viewport.on('scrollin:scrolling',function() { 
-					addToDebugConsole('We are currently scrolling now'); 
-				}); 
-
 				$viewport.scrollin({
 					fetch: {url:'../results.json',dataType:'jsonp'},
+					resultHolder: $viewport.find('ul').get(0),
 					handlers: { 
-						onScrolling: function( scInstance, event ) {
-							console.log(scInstance.options);
-							//addToDebugConsole('Velocity: '+scInstance.metrics.scrollTarget.velocity);
+						onParse: function(scInstance, response) { 
+							response = JSON.parse(response);
+							return response['results'];
+						},
+						onScrolling: function( scInstance ) { 
+							//console.log( scInstance.metrics.scrollTarget.scroll.percentScrolledY );
 						}
 					}
 				});
