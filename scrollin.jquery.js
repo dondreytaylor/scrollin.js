@@ -23,6 +23,29 @@
 
 			return {}; 
 		},
+		functionExists: function( obj, functionName ) { 
+		
+			return (typeof obj === 'object') && (obj[functionName] !== undefined && typeof obj[functionName] === 'function');
+		},
+		functionsExist: function( obj, functionNames ) { 
+			
+			var functionName;
+			var exists = 0; 
+
+			if (obj !== undefined && typeof functionNames === 'object') { 
+				for(functionName in functionNames)
+				{
+					if (obj[functionNames[functionName]] !== undefined && typeof obj[functionNames[functionName]] === 'function')
+					{
+						++exists;
+					}	
+				}
+
+				return exists === functionNames.length;
+			}
+
+			return false;
+		},
 		isArray: function( obj ) {
 			
 			return Object.prototype.toString.call( obj ) === '[object Array]';
@@ -551,13 +574,12 @@
 
 	Scrollin.prototype.onParse = function( scInstance, response ) {
 		
-		var parsedResponse; 
+		var parsedResults; 
 
 		try 
 		{
-			parsedResponse = JSON.parse(response); 
-			parsedResponse = parsedResponse['results'];
-			
+			response = JSON.parse(response); 
+			parsedResults = scInstance.applyTemplate( response['results'] );
 		}
 		catch(responseParseException)
 		{
@@ -565,7 +587,7 @@
 		}
 		
 
-		return parsedResponse;
+		return parsedResults;
 	};
 
 	Scrollin.prototype.onQueueUpdate = function( scInstance, parsedResponse ) { 
@@ -654,7 +676,46 @@
 		return this;
 	}; 
 
-	Scrollin.prototype.applyTemplate = function() { 
+	Scrollin.prototype.applyTemplate = function( results ) { 
+		
+		var result;
+		var compiled;
+		var parsedResults = []; 
+		var templateEngine; 
+
+		if (typeof this.options.template === 'function') 
+		{ 
+			for(result in results)
+			{
+				parsedResults.push( this.options.template( this, results[result] ) );
+			
+				// Apply Template using Template Engine if user supplied one
+				if (this.options.templateEngine)
+				{
+					templateEngine = this.options.templateEngine;
+					
+					switch(true) 
+					{
+						
+						// Dust	
+						case (dust !== undefined && typeof dust === 'object') && (Helpers.functionsExist(templateEngine,['compile','loadSource','render'])):    
+							compiled = templateEngine.compile(parsedResults[result],'scrollinresult');
+							templateEngine.loadSource(compiled);
+							templateEngine.render("scrollinresult", results[result], function( err, out)
+							{
+								parsedResults[result] = out;
+							});
+							break;
+
+						// Mustache Compliant templates
+						default:
+							break;
+					} 
+				}
+			}
+		}
+
+		return parsedResults;
 	}; 	
 
 	Scrollin.prototype.cacheResult = function( resultHTMLElement ) { 

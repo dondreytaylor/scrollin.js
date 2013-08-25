@@ -52,6 +52,7 @@
 		<a href="javascript:void(0);" class="debug-button">Clear Debug</a>
 		<script type="text/javascript" src="../libs/jquery-1.7.1.js" ></script>
 		<script type="text/javascript" src="../../scrollin.jquery.js" ></script>
+		<script type="text/javascript" src="../libs/dust-full-0.3.0.js" ></script>
 		<script type="text/javascript"> 
 			$(function() { 
 				"use strict" 
@@ -70,14 +71,15 @@
 				
 				$debugClearButton.on('click',clearDebug); 
 				
-				$viewport.on('scrollin:initialized',function() { 
-					addToDebugConsole('Scrollin has been initialized');
-				}); 
-
+				
 				$viewport.scrollin({
 					fetch: {url:'../results.json',dataType:'jsonp'},
+					fillOnLoad: true,
 					resultHolder: $viewport.find('ul').get(0),
-					triggerfetchpercent: .9
+					templateEngine: dust,
+					template: function( scInstance, result ) { 
+						return "<li class='result'><img title='{title}' src='{src}' /></li>";
+					}
 				});
 
 			}); 
