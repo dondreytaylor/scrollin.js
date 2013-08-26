@@ -57,8 +57,8 @@
 			$(function() { 
 				"use strict" 
 
-				var $debug = $('.debug'); 
-				var $viewport = $('.viewport'); 
+				var $debug            = $('.debug'); 
+				var $viewport         = $('.viewport'); 
 				var $debugClearButton = $('.debug-button'); 
 				var clearDebug = function() {
 
@@ -68,19 +68,57 @@
 					
 					$debug.children('ul').append($('<li>'+text+'</li>')); 
 				}; 
-				
 				$debugClearButton.on('click',clearDebug); 
 				
-				
+				var url = "http://travooz.com:3100/results?callback=Scrollin.callbacks.jsonp";
+
+
+				var supports_html5_storage = function() 
+				{
+					try {
+						return 'localStorage' in window && window['localStorage'] !== null;
+					} catch (e) {
+						return false;
+					}
+				};
+/*
+				if(supports_html5_storage())
+				{
+					var key = (new Date()).getTime();
+					var val = localStorage.setItem('scrollin-queue' );
+					console.log( JSON.parse(localStorage.getItem('scrollin-results')) );
+				}
+*/
+
+
 				$viewport.scrollin({
-					fetch: {url:'../results.json',dataType:'jsonp'},
+					fetch: {url:url,dataType:'jsonp'},
 					fillOnLoad: true,
+					limit: 10,
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
-					template: function( scInstance, result ) { 
+					template: function( scInstance, result  ) { 
 						return "<li class='result'><img title='{title}' src='{src}' /></li>";
+					},
+					url: function( scInstance ) {
+						console.log( scInstance );
+					},
+					handlers: { 
+						onInitialized: function( scInstance ) { 
+							addToDebugConsole('Scrollin has been initialized');
+						},
+						onDestroy: function() { 
+							addToDebugConsole('Scrollin has been destroyed');
+						},
+						onResume: function() { 
+							addToDebugConsole('Scrollin resumed');
+						}, 
+						onPause: function() { 
+							addToDebugConsole('Scrollin paused');
+						}
 					}
 				});
+
 
 			}); 
 		</script> 

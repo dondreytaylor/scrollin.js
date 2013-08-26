@@ -236,7 +236,7 @@
 			{
 				for(index in object) 
 				{
-					if (typeof object[index] === 'string')
+					if (typeof object[index] === 'string' || typeof object[index] === 'number' || typeof object[index] === 'boolean')
 					{
 						if(returningString.length === 0)
 						{
@@ -249,7 +249,7 @@
 					}
 					else
 					{
-						if (typeof object[index] === 'object') 
+						if (typeof object[index] === 'object' && object[index]) 
 						{
 							Helpers.urlifyObject( object, returningString );
 						}
@@ -277,6 +277,7 @@
 		
 		var handlers; 
 		var defaults;
+		var state;
 		var initializedEvent; 
 
 		if ( !( this instanceof Scrollin ) ) { 
@@ -291,20 +292,23 @@
 		}
 
 
-		handlers = {
-			onBeforeFetch:   { overridable: true,   stack: [],                   dispatchOn: '', },     
-		    onFetch:         { overridable: true,   stack: [],                   dispatchOn: '', },                  
-		    onFetchSuccess:  { overridable: true,   stack: [],                   dispatchOn: '', },    
-		    onFetchFailure:  { overridable: true,   stack: [],                   dispatchOn: '', },   
-		    onFetchWait:     { overridable: true,   stack: [],                   dispatchOn: '', },         
-		    onParse:         { overridable: true,   stack: [this.onParse],       dispatchOn: '', },                  
-		    onComplete:      { overridable: true,   stack: [],                   dispatchOn: '', },           
-		    onScrolling:     { overridable: false,  stack: [this.onScrolling],   dispatchOn: 'scroll', },        
-		    onQueueUpdate:   { overridable: false,  stack: [this.onQueueUpdate], dispatchOn: 'scrollin:queueupdate', },        
-		    onInitialized:   { overridable: false,  stack: [this.onInitialized], dispatchOn: 'scrollin:initialized', },  
-		    onStill:         { overridable: true,   stack: [],                   dispatchOn: '', },         	
-		    onPageEnterView: { overridable: true,   stack: [],                   dispatchOn: '', },  
-		    onPageLeaveView: { overridable: true,   stack: [],                   dispatchOn: '', }  
+		this.handlers = {
+			onBeforeFetch:   { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },     
+		    onFetch:         { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },                  
+		    onFetchSuccess:  { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },    
+		    onFetchFailure:  { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },   
+		    onFetchWait:     { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },         
+		    onDestroy:       { overridable: false,  stackEventCallbacks: [], stack: [this.onDestroy],     dispatchOn: '' },                  
+		    onParse:         { overridable: true,   stackEventCallbacks: [], stack: [this.onParse],       dispatchOn: '' },                  
+		    onComplete:      { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },
+		    onPause:         { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:paused'},           
+		    onResume:        { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:resumed'},           
+		    onScrolling:     { overridable: false,  stackEventCallbacks: [], stack: [this.onScrolling],   dispatchOn: 'scroll', },        
+		    onQueueUpdate:   { overridable: false,  stackEventCallbacks: [], stack: [this.onQueueUpdate], dispatchOn: 'scrollin:queueupdate' },        
+		    onInitialized:   { overridable: false,  stackEventCallbacks: [], stack: [this.onInitialized], dispatchOn: 'scrollin:initialized' },  
+		    onStill:         { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },         	
+		    onPageEnterView: { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },  
+		    onPageLeaveView: { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' }  
 		};
 
 		defaults  = {
@@ -313,19 +317,20 @@
 		    templateEngine: "", 	       // - engine used for markup
 		    fetch: "", 				       // - url where we will be fetching 
 		    debug: "", 				       // - used for development purposes
-		    limit: "", 				       // - max number of results to be displayed per page
-		    dataToPass: "", 		       // - data to be passed a long on each request for each page
+		    limit: false, 				   // - max number of results to be displayed per page
+		    dataToPass: {}, 		       // - data to be passed a long on each request for each page
 		    scrollSpeed: "", 		       // - 'fast','slow','normal' 
 		    scrollPx: "", 			       // - '40px' additional pixels to be scrolled 
 		    reverse: "", 			       // - Adds results in the reverse direction
 		    animate: "", 			       // - animates elements in 
 		    loading: "", 			       // - 'indicatorImg','indicatorText'
 			fillOnLoad: true, 		       // - fills up scroll element with results
-			data: "", 				       // - pass data to be accessed within each function
-			updateBrowserURL: "", 	       // - bool or function to update url Ex: #/page/2 or #/<whatever>/{{pageNumber}}/<whatever> 
+			data: {}, 				       // - pass data to be accessed within each function
+			url: true, 	       			   // - bool or function to update url Ex: #/page/2 or #/<whatever>/{{pageNumber}}/<whatever> 
 			resultHolder: "", 		       // - selector of holder to contain results
 			resultDataAtrr: "",		       // - turn off data attributes
-			triggerfetchpercent: .8
+			triggerfetchpercent: .8,
+			paused: false
 		};
 
 		this.metrics = { 
@@ -361,37 +366,54 @@
 		}; 
 		
 		this.timeouts = {
+			
 			updateScrollVelocity:0
 		}; 
 
-		this.getHandlers = function() { 
-			
-			return Helpers.extend( {}, handlers);
-		}; 
- 		
  		this.elements = Helpers.makeArray( elem ); 
+		
 		this.options  = Helpers.extend( defaults, options);
+		
 		this.events   = { 
 			initialized: new Event('scrollin:initialized'),
 			scrolling:   new Event('scrollin:scrolling'),
 			complete:    new Event('scrollin:complete'),
-			queueupdate: new Event('scrollin:queueupdate')
+			queueupdate: new Event('scrollin:queueupdate'),
+			destroyed:   new Event('scrollin:destroyed'),
+			paused:      new Event('scrollin:paused'),
+			resumed:     new Event('scrollin:resumed') 
 		}; 
+		
 		this.errors = { 
 			
 			onParseException: new Error('Invalid response format see documentation or override onParse().')
 		};
+		
+		state = { 
+			resultSet: 1,
+			limit: this.options.limit
+		}; 
 
+		this.getHandlers = function() { 
+			
+			return Helpers.extend( {}, this.handlers);
+		}; 
+ 		
+ 		this.getState = function() { 
+ 			
+ 			return Helpers.extend( {}, state);
+		};
+		
 		if ( typeof this.options['handlers'] === "object") { 
 			for ( var index in this.options['handlers'] ) {
-				if ( typeof handlers[index] === "object") { 
-					if (handlers[index]['overridable']) 
+				if ( typeof this.handlers[index] === "object") { 
+					if (this.handlers[index]['overridable']) 
 					{
-						handlers[index]['stack'] = [this.options['handlers'][index]];
+						this.handlers[index]['stack'] = [this.options['handlers'][index]];
 					}
 					else 
 					{ 
-						handlers[index]['stack'].push( this.options['handlers'][index] );
+						this.handlers[index]['stack'].push( this.options['handlers'][index] );
 					}
 				}
 			}
@@ -446,7 +468,7 @@
 		return [];
 	}; 
 
-	Scrollin.prototype.dispatchHandler = function( handlerName, scInstance, data) {
+	Scrollin.prototype.dispatchHandler = function( handlerName, scInstance, argument ) {
 	 	
 	 	var handlers = scInstance.handlersSet(handlerName);
 	 	var handler;
@@ -457,12 +479,23 @@
 	 	{
 	 		for(handler in handlers) 
 	 		{ 
-	 			response.push( handlers[handler]( scInstance, data ) );
+	 			response.push( handlers[handler]( scInstance, argument, scInstance.options.data ) );
 	 		}
 	 	}
 		
 		return response;
 	};
+
+	Scrollin.prototype.checkAndTrigger = function() { 
+		
+		if (this.at('triggerdistance')) 
+		{
+			if (!this.options['paused']) { 
+				
+				this.fetch();
+			}
+		}
+	}; 
 
 	/* ------ Options ------ */ 
 	Scrollin.prototype.options = {}; 
@@ -527,12 +560,19 @@
 	}; 
 
 	/* ------ Handler Logic------ */ 
-	Scrollin.prototype.bindHandler = function(target, eventType, handler ) { 
+	Scrollin.prototype.bindHandler = function(target, eventType, handler, handlerName ) { 
 		var scInstance = this;
+		var eventCallback;
+
 		if(target !== undefined && target['addEventListener'] !== undefined && typeof handler === 'function') {
-			target['addEventListener']( eventType, function(event) {
-				handler( scInstance, event ); 
-			});
+			
+			eventCallback = function(event) {
+				handler( scInstance, event, scInstance.options.data ); 
+			}; 
+
+			this.handlers[handlerName]['stackEventCallbacks'].push( eventCallback );
+
+			target['addEventListener']( eventType, eventCallback );
 		}
 		return this; 
 	}; 
@@ -544,22 +584,41 @@
 			if ( handlers[handler] !== undefined ) { 
 				if ( handlers[handler]['stack'].length > 0 ) { 
 					for( index in handlers[handler]['stack'] ) { 
-						this.bindHandler( this.elements[0], handlers[handler]['dispatchOn'], handlers[handler]['stack'][index] );
+						this.bindHandler( this.elements[0], handlers[handler]['dispatchOn'], handlers[handler]['stack'][index], handler );
 					}
 				}
 			}
 		}
 	}; 
 
+	Scrollin.prototype.unbindHandler = function(target, eventType, handler ) { 
+		var scInstance = this;
+		if(target !== undefined && target['removeEventListener'] !== undefined && typeof handler === 'function') {
+			target['removeEventListener']( eventType, handler ); 
+		}
+		return this; 
+	}; 
+
+	Scrollin.prototype.unbindHandlers = function() { 
+		var handler;
+		var handlers = this.getHandlers();
+		for(handler in handlers) {
+			if ( handlers[handler] !== undefined ) { 
+				if ( handlers[handler]['stack'].length > 0 ) { 
+					for( index in handlers[handler]['stack'] ) { 
+						this.unbindHandler( this.elements[0], handlers[handler]['dispatchOn'], handlers[handler]['stackEventCallbacks'][index] );
+					}
+				}
+			}
+		}
+	};  
+
 	Scrollin.prototype.onScrolling = function( scInstance, event ) { 
 		
 		scInstance.updateScrollVelocity().updateMetrics();
 		scInstance.elements[0].dispatchEvent(scInstance.events.scrolling);
 		
-		if (scInstance.at('triggerdistance')) 
-		{
-			scInstance.fetch();
-		}
+		scInstance.checkAndTrigger();
 	}; 
 
 	Scrollin.prototype.onInitialized = function( scInstance, event ) {
@@ -578,7 +637,6 @@
 
 		try 
 		{
-			response = JSON.parse(response); 
 			parsedResults = scInstance.applyTemplate( response['results'] );
 		}
 		catch(responseParseException)
@@ -594,10 +652,25 @@
 		
 		if (parsedResponse instanceof Array)
 		{
-			scInstance.queue.push(parsedResponse);
+			scInstance.cache.results.push(parsedResponse[0]); 
+
+			scInstance.queue.push(parsedResponse[0]);
+
 			scInstance.elements[0].dispatchEvent(scInstance.events.queueupdate);
 		}
 		return scInstance;
+	}; 
+
+	Scrollin.prototype.onDestroy = function( scInstance ) { 
+		if ( instances.length > 0 ) { 
+			for(var index in instances) { 
+				if (instances[index].options.scID === scInstance.options.scID) { 
+					scInstance.unbindHandlers();
+					delete instances[index];
+					instances.splice(index,1);
+				}
+			}
+		}
 	}; 
 
 	/* ------- Queue Logic -------- */
@@ -608,8 +681,6 @@
 		var that = this; 
 		if (this.metrics.scrollTarget.scroll.height <= this.metrics.scrollTarget.height) 
 		{
-			console.log('Keep filling this up!');
-				
 			this.fetch(function()
 			{
 				that.fill(); 
@@ -624,18 +695,55 @@
 
 	Scrollin.prototype.remoteFetch = function( callback ) { 
 		
+		
 		var that = this;
 		var handlers; 
+		var urlWithData;
+		var dataToPass = typeof this.options.dataToPass === 'function' ? this.options.dataToPass() : this.options.dataToPass; 
+		
+		dataToPass = Helpers.urlifyObject( Helpers.extend( dataToPass, this.getState() ) ); 
+		
+		
 
-		Helpers.sendJSONP('http://dondrey.devo.purzue.com/rest/token/Test?action=results&callback=Scrollin.callbacks.jsonp&return_as=JSONP',function(response) 
+		// Set Remote
+		this.options.fetch           = typeof this.options.fetch === 'object' ? this.options.fetch : {url:this.options.fetch};
+		this.options.fetch.url       = typeof this.options.fetch.url === 'string' ? this.options.fetch.url : "";
+		this.options.fetch.dataType  = typeof this.options.fetch.dataType === 'string' ? this.options.fetch.dataType : 'json';
+		
+		
+
+		if (this.options.fetch.url.lastIndexOf('?') === -1)
 		{
-			that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
-			that.updateResultHolder(); 
-			if (typeof callback === 'function')
-			{
-				callback( that );
-			}
-		});
+			dataToPass = '?' + dataToPass;
+		}
+		else if (this.options.fetch.url.lastIndexOf('&') === -1 || this.options.fetch.url.lastIndexOf('&') !== this.options.fetch.url.length ) 
+		{
+			dataToPass = '&' + dataToPass;
+		}
+		
+		
+		this.options.fetch.urlWithData = this.options.fetch.url + dataToPass;
+		
+		switch(this.options.fetch.dataType.toLowerCase())
+		{	
+			// Same Domain
+			case 'json':
+				break;
+
+			// Cross Domain
+			default:
+				Helpers.sendJSONP(this.options.fetch.urlWithData,function(response) 
+				{
+					that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
+					that.updateResultHolder();
+
+					if (typeof callback === 'function')
+					{
+						callback( that );
+					}
+				});
+				break;
+		}
 	}; 
 	
 	Scrollin.prototype.cacheFetch = function( response, pageNumber ) { 
@@ -718,26 +826,75 @@
 		return parsedResults;
 	}; 	
 
-	Scrollin.prototype.cacheResult = function( resultHTMLElement ) { 
-	};
-
-	Scrollin.prototype.addResultToDOM = function( resultHTMLElement ) { 
-	};
-
-	Scrollin.prototype.removeResultFromDOM = function( resultSelector ) { 
-	}; 
-
 	/* ------ Cache Logic ------ */ 
-	Scrollin.prototype.cache = {}; 
+	Scrollin.prototype.cache = {results:[]}; 
 
-	Scrollin.prototype.addToCache = function( key, value, local ) { 
+	Scrollin.prototype.addToLocalStorage = function( key, value, local ) { 
 	}; 
 
-	Scrollin.prototype.removeFromCache = function( key, local ) { 
+	Scrollin.prototype.removeFromLocalStorage = function( key, local ) { 
 	};
 
+	/* ------ API Methods ------*/
+	Scrollin.prototype.is = function( state ) {
+		
+		switch (state)
+		{
+			case 'destroyed':
+				break;
 
-	/* --- Attach to Widndow --- */ 
+			case 'completed':
+				break;
+
+			case 'paused':
+				break;
+
+			case 'scrolling':
+				break;
+
+			case 'still':
+				break;
+
+			case 'onOutOfBoundPage':
+				break;
+
+			case 'fetching':
+				break;
+
+		}
+	};
+
+	Scrollin.prototype.get = function( prop ) { 
+		
+		return this.options[prop]; 
+	}; 
+
+	Scrollin.prototype.set = function( prop, value ) {
+		
+		this.options[prop] = value; 
+		return this;
+	}; 
+
+	Scrollin.prototype.pause = function() { 
+		this.options['paused'] = true;
+		this.elements[0].dispatchEvent(this.events.paused);
+		return this; 
+	}; 
+
+	Scrollin.prototype.resume = function() { 
+		this.options['paused'] = false;
+		this.elements[0].dispatchEvent(this.events.resumed); 
+		this.checkAndTrigger();
+		return this; 
+	}; 
+
+	Scrollin.prototype.destroy = function() { 
+		this.dispatchHandler('onDestroy', this);
+		this.elements[0].dispatchEvent(this.events.destroyed);
+	}; 
+
+
+	/* --- Attach to Window --- */ 
 	window['Scrollin'] = Scrollin;	
 	////////////////////////////////////
 
