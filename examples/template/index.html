@@ -30,10 +30,10 @@
 			}
 			#results .result { 
 				list-style-type: none; 
-				min-width: 50px; 
-				min-height:50px; 
+				 
 				/*background: green; */
-				margin-bottom: 10px; 
+				margin-bottom: 20px; 
+				
 			}
 
 			.semitvisible { 
@@ -70,11 +70,10 @@
 					
 					$debug.children('ul').append($('<li>'+text+'</li>')); 
 				}; 
+				
 				$debugClearButton.on('click',clearDebug); 
 				
 				var url = "http://travooz.com:3100/results?callback=Scrollin.callbacks.jsonp";
-
-
 				var supports_html5_storage = function() 
 				{
 					try {
@@ -83,15 +82,19 @@
 						return false;
 					}
 				};
-/*
+				
+
+				/*
 				if(supports_html5_storage())
 				{
 					var key = (new Date()).getTime();
 					var val = localStorage.setItem('scrollin-queue' );
 					console.log( JSON.parse(localStorage.getItem('scrollin-results')) );
 				}
-*/
+				*/
 				
+
+
 
 				$viewport.scrollin({
 					fetch: {url:url,dataType:'jsonp'},
@@ -100,7 +103,7 @@
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
 					template: function( scInstance, result  ) { 
-						return "<li class='result'><img title='{title}' src='{src}' /></li>";
+						return "<li class='result'><img title='{title}' src='http://dummyimage.com/200x400/000/fff' /><img title='{title}' src='http://dummyimage.com/200x400/000/fff' /></li>";
 					},
 					handlers: { 
 						onInitialized: function( scInstance ) { 
@@ -118,26 +121,13 @@
 					},
 					apply: { 
 						resultBefore: function( scInstance, result, index ) {
-							$resultBefore = $(result);
-							$resultBefore.css('opacity',0);
 						},
 						resultAfter: function( scInstance, result, index )  { 
-							
-							setTimeout(function() 
-							{
-								$resultAfter = $(result);
-								$resultAfter.animate({opacity:1},200); 
-							
-							}, (index+1) * 5);
 						}
 					}
-					// : { 
-					// 	resultBefore: function() { 
-					// 	},
-					// 	resultAfter: function() { 
-					// 	}
-					// }
 				});
+
+
 
 
 			}); 

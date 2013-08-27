@@ -329,8 +329,7 @@
 			url: true, 	       			   // - bool or function to update url Ex: #/page/2 or #/<whatever>/{{pageNumber}}/<whatever> 
 			resultHolder: "", 		       // - selector of holder to contain results
 			resultDataAtrr: "",		       // - turn off data attributes
-			triggerfetchpercent: .8,
-			paused: false,
+			triggerfetchpercent: .98,
 			apply: {}
 		};
 
@@ -359,6 +358,10 @@
 					top    : 0,
 					left   : 0 
 				}
+			},
+			lastResult:  { 
+				count : 0,
+				height: 0
 			},
 			network : {
 				avgResponseTime: 0, 
@@ -391,8 +394,12 @@
 		};
 		
 		this.state = { 
-			resultSet: 1,
-			limit: this.options.limit
+			resultSet : 1,
+			limit     : this.options.limit,
+			scrolling : false,
+			fetching  : false,
+			paused    : false,
+			completed : false
 		}; 
 
 		this.getHandlers = function() { 
@@ -491,7 +498,7 @@
 		
 		if (this.at('triggerdistance')) 
 		{
-			if (!this.options['paused']) { 
+			if (!this.state['paused']) { 
 				
 				this.fetch();
 			}
@@ -548,6 +555,8 @@
 			this.metrics.scrollTarget.scroll.height = this.elements[0].scrollHeight;
 			this.metrics.scrollTarget.scroll.top = this.elements[0].scrollTop;
 			this.metrics.scrollTarget.scroll.left = this.elements[0].scrollLeft;
+			this.metrics.scrollTarget.scroll.scrollY = (this.elements[0].scrollHeight - this.metrics.scrollTarget.height);
+			this.metrics.scrollTarget.scroll.scrollX = (this.elements[0].scrollWidth - this.metrics.scrollTarget.width); 
 			this.metrics.scrollTarget.scroll.percentScrolledY = (this.elements[0].scrollTop) / (this.elements[0].scrollHeight - this.metrics.scrollTarget.height); 
 			this.metrics.scrollTarget.scroll.percentScrolledX = (this.elements[0].scrollLeft) / (this.elements[0].scrollWidth - this.metrics.scrollTarget.width); 
 			this.metrics.scrollTarget.lastUpdated = (new Date()).getTime();
@@ -557,13 +566,11 @@
 		return this;
 	}; 
 
-	Scrollin.prototype.updateResultMetrics = function() { 
-		if ( this.options['resultsHolder'] !== undefined ) { 
-		}
-		else { 
-		}
-		return this;	
-	};
+	Scrollin.prototype.updateLastResultMetrics = function( results ) {
+		
+		console.log( results[0] ); 
+		console.log( typeof results );
+	}; 
 
 	Scrollin.prototype.updateResultsHolderMetrics = function() {
 		if ( this.elements.length > 0 ) {
@@ -641,9 +648,13 @@
 	Scrollin.prototype.onScrolling = function( scInstance, event ) { 
 		
 		scInstance.updateScrollVelocity().updateMetrics();
+		
 		scInstance.elements[0].dispatchEvent(scInstance.events.scrolling);
 		
-		scInstance.checkAndTrigger();
+		if (!scInstance.is('fetching')) 
+		{ 
+			scInstance.checkAndTrigger();
+		}
 	}; 
 
 	Scrollin.prototype.onInitialized = function( scInstance, event ) {
@@ -776,10 +787,16 @@
 
 			// Cross Domain
 			default:
+				
+				this.state['fetching'] = true; 
+
 				Helpers.sendJSONP(this.options.fetch.urlWithData,function(response) 
 				{
 					that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
 					that.updateResultHolder();
+
+					// Delay setting indicator to prevent multiple requests
+					setTimeout(function() { that.state['fetching'] = false; },1000); 
 
 					if (typeof callback === 'function')
 					{
@@ -796,7 +813,9 @@
 	/* ------ Results Logic ------ */
 	Scrollin.prototype.updateResultHolder = function() {
 		
+		var that = this; 
 		var index;
+		var images;
 		var child;
 		var children;
 		var childrenElms = [];
@@ -807,6 +826,7 @@
 			{
 				children = this.queue.pop();
 				
+				
 				for(index in children) 
 				{ 
 					
@@ -816,6 +836,8 @@
 					childrenElms.push(child[0]);
 				}
 				
+				this.updateLastResultMetrics( childrenElms ); 
+				
 				this.apply('resultsBefore', childrenElms ); 
 
 				for (index in childrenElms) 
@@ -823,19 +845,52 @@
 					this.apply('resultBefore', childrenElms[index], index );
 
 					this.options.resultHolder.appendChild( childrenElms[index] );
+					
+					images = childrenElms[index].getElementsByTagName('img'); 
+					
+					// Calculate image dimensions
+					(function(resultSet) 
+					{ 
+						var imgCount = 0; 
+						var img; 
+						
+
+						for(img in images) 
+						{
+							
+							if (!isNaN(parseInt(img))) 
+							{
+								images[img].onload = function() 
+								{
+									++imgCount;
+
+									if (imgCount === images.length/resultSet) 
+									{ 
+										that.updateMetrics();
+
+										console.log(childrenElms[index].currentStyle );
+
+									}
+
+								};
+							};
+						}
+
+					})(this.state.resultSet);
 
 
 					this.apply('resultAfter', this.options.resultHolder.lastChild, index );
-				
 				}
 
 				this.apply('resultsAfter', childrenElms );
 			}
 		} 
 
+		
+		
 		++this.state.resultSet;
-		this.updateHash(); 
-		this.updateMetrics(); 
+
+		this.updateMetrics();
 
 		return this;
 	}; 
@@ -903,25 +958,27 @@
 		
 		switch (state)
 		{
-			case 'destroyed':
-				break;
-
-			case 'completed':
-				break;
-
-			case 'paused':
+			case 'fetching':
+				return this.state.fetching;
 				break;
 
 			case 'scrolling':
+				return this.state.scrolling;
+				break;
+
+			case 'completed':
+				return this.state.completed;
+				break;
+
+			case 'paused':
+				return this.state.paused;
 				break;
 
 			case 'still':
+				return !this.state.scrolling;
 				break;
 
 			case 'onOutOfBoundPage':
-				break;
-
-			case 'fetching':
 				break;
 
 		}
@@ -939,13 +996,13 @@
 	}; 
 
 	Scrollin.prototype.pause = function() { 
-		this.options['paused'] = true;
+		this.state['paused'] = true;
 		this.elements[0].dispatchEvent(this.events.paused);
 		return this; 
 	}; 
 
 	Scrollin.prototype.resume = function() { 
-		this.options['paused'] = false;
+		this.state['paused'] = false;
 		this.elements[0].dispatchEvent(this.events.resumed); 
 		this.checkAndTrigger();
 		return this; 
