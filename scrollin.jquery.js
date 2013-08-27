@@ -330,7 +330,8 @@
 			resultHolder: "", 		       // - selector of holder to contain results
 			resultDataAtrr: "",		       // - turn off data attributes
 			triggerfetchpercent: .8,
-			paused: false
+			paused: false,
+			apply: {}
 		};
 
 		this.metrics = { 
@@ -389,7 +390,7 @@
 			onParseException: new Error('Invalid response format see documentation or override onParse().')
 		};
 		
-		state = { 
+		this.state = { 
 			resultSet: 1,
 			limit: this.options.limit
 		}; 
@@ -401,7 +402,7 @@
  		
  		this.getState = function() { 
  			
- 			return Helpers.extend( {}, state);
+ 			return Helpers.extend( {}, this.state);
 		};
 		
 		if ( typeof this.options['handlers'] === "object") { 
@@ -496,6 +497,30 @@
 			}
 		}
 	}; 
+
+	Scrollin.prototype.updateHash = function() { 
+		
+		var url; 
+
+		// Use defined url
+		if (typeof this.options.url === 'function')
+		{
+			url = this.options.url( this ); 
+
+			if (typeof url === 'string')
+			{
+				window.location.hash = url; 
+			}
+		}
+
+		// Default
+		else  
+		{
+			window.location.hash = '/page/'+this.getState().resultSet;
+		}
+
+		return this; 
+	};
 
 	/* ------ Options ------ */ 
 	Scrollin.prototype.options = {}; 
@@ -673,6 +698,25 @@
 		}
 	}; 
 
+	/* -------- Effects ----------- */
+	Scrollin.prototype.apply = function( perform, data, index ) { 
+		
+		switch ( true ) { 
+			
+			case ('resultBefore' === perform) && (this.options.apply && typeof this.options.apply === 'object'  && typeof  this.options.apply.resultBefore === 'function'):
+			case ('resultAfter' === perform) && (this.options.apply && typeof this.options.apply === 'object'  && typeof  this.options.apply.resultAfter === 'function'):
+				this.options.apply[perform]( this, data, index);
+				break;
+
+			case ('resultsAfter' === perform) && (this.options.apply && typeof this.options.apply === 'object'  && typeof  this.options.apply.resultsAfter === 'function'):
+			case ('resultsBefore' === perform) && (this.options.apply && typeof this.options.apply === 'object'  && typeof  this.options.apply.resultsBefore === 'function'):
+				this.options.apply[perform]( this, data);
+				break;
+		}
+
+		return this; 
+	}; 
+
 	/* ------- Queue Logic -------- */
 	Scrollin.prototype.queue = []; 
 
@@ -755,6 +799,7 @@
 		var index;
 		var child;
 		var children;
+		var childrenElms = [];
 
 		if (this.at('triggerdistance') || this.at('start')) 
 		{ 
@@ -764,14 +809,32 @@
 				
 				for(index in children) 
 				{ 
+					
 					child = document.createElement('div');
 					child.innerHTML = children[index];
 					child = child.childNodes;
-					this.options.resultHolder.appendChild( child[0] );
+					childrenElms.push(child[0]);
 				}
+				
+				this.apply('resultsBefore', childrenElms ); 
+
+				for (index in childrenElms) 
+				{
+					this.apply('resultBefore', childrenElms[index], index );
+
+					this.options.resultHolder.appendChild( childrenElms[index] );
+
+
+					this.apply('resultAfter', this.options.resultHolder.lastChild, index );
+				
+				}
+
+				this.apply('resultsAfter', childrenElms );
 			}
 		} 
 
+		++this.state.resultSet;
+		this.updateHash(); 
 		this.updateMetrics(); 
 
 		return this;
