@@ -321,7 +321,7 @@
 		    dataToPass: {}, 		       // - data to be passed a long on each request for each page
 		    scrollSpeed: "", 		       // - 'fast','slow','normal' 
 		    scrollPx: "", 			       // - '40px' additional pixels to be scrolled 
-		    reverse: "", 			       // - Adds results in the reverse direction
+		    reverse: false, 			   // - Adds results in the reverse direction
 		    animate: "", 			       // - animates elements in 
 		    loading: "", 			       // - 'indicatorImg','indicatorText'
 			fillOnLoad: true, 		       // - fills up scroll element with results
@@ -457,7 +457,14 @@
 				break;
 
 			case 'triggerdistance':
-				return this.options.triggerfetchpercent <= this.metrics.scrollTarget.scroll.percentScrolledY;
+				if(this.options.reverse === true)
+				{
+					return (1 - this.options.triggerfetchpercent) >= this.metrics.scrollTarget.scroll.percentScrolledY;
+				}
+				else 
+				{
+					return this.options.triggerfetchpercent <= this.metrics.scrollTarget.scroll.percentScrolledY;
+				}
 				break;
 		}
 	};
@@ -818,6 +825,7 @@
 		var images;
 		var child;
 		var children;
+		var totalHeight = 0;
 		var childrenElms = [];
 
 		if (this.at('triggerdistance') || this.at('start')) 
@@ -844,10 +852,18 @@
 				{
 					this.apply('resultBefore', childrenElms[index], index );
 
-					this.options.resultHolder.appendChild( childrenElms[index] );
-					
+					if (this.options.reverse === true) 
+					{
+						this.options.resultHolder.insertBefore( childrenElms[index], this.options.resultHolder.firstChild );
+					}
+					else
+					{
+						this.options.resultHolder.appendChild( childrenElms[index] );
+					}
+
 					images = childrenElms[index].getElementsByTagName('img'); 
 					
+
 					// Calculate image dimensions
 					(function(resultSet) 
 					{ 
@@ -864,12 +880,21 @@
 								{
 									++imgCount;
 
-									if (imgCount === images.length/resultSet) 
+									totalHeight += (
+										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('height')) + 
+										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-top')) + 
+										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-bottom'))
+									);
+									
+
+									if (imgCount === images.length) 
 									{ 
 										that.updateMetrics();
 
-										console.log(childrenElms[index].currentStyle );
-
+										if (that.options.reverse === true) 
+										{
+											that.elements[0].scrollTop = totalHeight;
+										}
 									}
 
 								};

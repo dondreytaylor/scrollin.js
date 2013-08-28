@@ -30,10 +30,9 @@
 			}
 			#results .result { 
 				list-style-type: none; 
-				 
+				 height: 200px; 
 				/*background: green; */
-				margin-bottom: 20px; 
-				
+				margin-bottom: 10px; 
 			}
 
 			.semitvisible { 
@@ -100,10 +99,12 @@
 					fetch: {url:url,dataType:'jsonp'},
 					fillOnLoad: true,
 					limit: 10,
+					reverse: false,
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
 					template: function( scInstance, result  ) { 
-						return "<li class='result'><img title='{title}' src='http://dummyimage.com/200x400/000/fff' /><img title='{title}' src='http://dummyimage.com/200x400/000/fff' /></li>";
+						return "<li class='result'><img title='{title}' src='http://lorempixel.com/200/200/' /></li>";
+						//return "<li class='result'><img title='{title}' src='{src}' /></li>";
 					},
 					handlers: { 
 						onInitialized: function( scInstance ) { 
