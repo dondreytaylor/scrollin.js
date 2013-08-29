@@ -297,7 +297,6 @@
 		    onFetch:         { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },                  
 		    onFetchSuccess:  { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },    
 		    onFetchFailure:  { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },   
-		    onFetchWait:     { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },         
 		    onDestroy:       { overridable: false,  stackEventCallbacks: [], stack: [this.onDestroy],     dispatchOn: '' },                  
 		    onParse:         { overridable: true,   stackEventCallbacks: [], stack: [this.onParse],       dispatchOn: '' },                  
 		    onLastSet:       { overridable: false,  stackEventCallbacks: [], stack: [this.onLastSet],     dispatchOn: 'scrollin:lastset'},
@@ -467,7 +466,7 @@
 				}
 				else 
 				{
-					return Math.floor(this.metrics.scrollTarget.scroll.percentScrolledY * 100) === 0;
+					return Math.ceil(this.metrics.scrollTarget.scroll.percentScrolledY * 100) === 0;
 				}
 				break;
 
