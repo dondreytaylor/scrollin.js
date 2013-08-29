@@ -301,9 +301,11 @@
 		    onParse:         { overridable: true,   stackEventCallbacks: [], stack: [this.onParse],       dispatchOn: '' },                  
 		    onLastSet:       { overridable: false,  stackEventCallbacks: [], stack: [this.onLastSet],     dispatchOn: 'scrollin:lastset'},
 		    onComplete:      { overridable: false,  stackEventCallbacks: [], stack: [this.onCompleted],   dispatchOn: 'scrollin:complete'},
+		   
 		    onPause:         { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:pause'},           
 		    onResume:        { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:resume'},           
-		    onStart:         { overridable: false,  stackEventCallbacks: [], stack: [this.onStart],		  dispatchOn: 'scrollin:start'},           
+		    onStart:         { overridable: false,  stackEventCallbacks: [], stack: [this.onStart],		  dispatchOn: 'scrollin:start'},
+		    onEnd:           { overridable: false,  stackEventCallbacks: [], stack: [this.onEnd],         dispatchOn: 'scrollin:end'},           
 		    onScrolling:     { overridable: false,  stackEventCallbacks: [], stack: [this.onScrolling],   dispatchOn: 'scroll'},        
 		    onQueueUpdate:   { overridable: false,  stackEventCallbacks: [], stack: [this.onQueueUpdate], dispatchOn: 'scrollin:queueupdate' },        
 		    onInitialized:   { overridable: false,  stackEventCallbacks: [], stack: [this.onInitialized], dispatchOn: 'scrollin:initialized' },  
@@ -387,6 +389,7 @@
 			complete:    new Event('scrollin:complete'),
 			queueupdate: new Event('scrollin:queueupdate'),
 			start:       new Event('scrollin:start'),
+			end:         new Event('scrollin:end'),
 			destroy:     new Event('scrollin:destroy'),
 			pause:       new Event('scrollin:pause'),
 			resume:      new Event('scrollin:resume'),
@@ -479,6 +482,10 @@
 				{
 					return Math.floor(this.metrics.scrollTarget.scroll.percentScrolledY * 100) >= 100;
 				}
+				break;
+
+			case 'complete':
+				return this.at('end') && this.at('lastset'); 
 				break;
 
 			case 'lastset':
@@ -694,7 +701,12 @@
 			scInstance.elements[0].dispatchEvent(scInstance.events.start);
 		}
 
-		if (scInstance.at('end') && scInstance.at('lastset'))
+		if (scInstance.at('end')) 
+		{
+			scInstance.elements[0].dispatchEvent(scInstance.events.end);
+		}
+
+		if (scInstance.at('complete'))
 		{
 			scInstance.elements[0].dispatchEvent(scInstance.events.complete);
 		}
@@ -711,6 +723,12 @@
 	};
 	
 	Scrollin.prototype.onStart = function( scInstance, evnet ) { 
+	}; 
+
+	Scrollin.prototype.onEnd = function( scInstance, event ) { 
+	}; 
+
+	Scrollin.prototype.onCompleted = function( scInstance, event ) { 
 	}; 
 
 	Scrollin.prototype.onInitialized = function( scInstance, event ) {

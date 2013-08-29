@@ -126,8 +126,11 @@
 						onStart: function() {
 							addToDebugConsole('Scrollin has reached the start');
 						},
+						onEnd: function() { 
+							addToDebugConsole('Scrollin has reached the end');
+						}, 
 						onComplete: function() {
-							addToDebugConsole('Scrollin has reached the end.');
+							addToDebugConsole('Scrollin has completed.');
 						}
 					},
 					apply: { 
