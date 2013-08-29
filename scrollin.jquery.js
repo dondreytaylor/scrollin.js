@@ -300,10 +300,12 @@
 		    onFetchWait:     { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },         
 		    onDestroy:       { overridable: false,  stackEventCallbacks: [], stack: [this.onDestroy],     dispatchOn: '' },                  
 		    onParse:         { overridable: true,   stackEventCallbacks: [], stack: [this.onParse],       dispatchOn: '' },                  
-		    onComplete:      { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },
-		    onPause:         { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:paused'},           
-		    onResume:        { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:resumed'},           
-		    onScrolling:     { overridable: false,  stackEventCallbacks: [], stack: [this.onScrolling],   dispatchOn: 'scroll', },        
+		    onLastSet:       { overridable: false,  stackEventCallbacks: [], stack: [this.onLastSet],     dispatchOn: 'scrollin:lastset'},
+		    onComplete:      { overridable: false,  stackEventCallbacks: [], stack: [this.onCompleted],   dispatchOn: 'scrollin:complete'},
+		    onPause:         { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:pause'},           
+		    onResume:        { overridable: false,  stackEventCallbacks: [], stack: [],			          dispatchOn: 'scrollin:resume'},           
+		    onStart:         { overridable: false,  stackEventCallbacks: [], stack: [this.onStart],		  dispatchOn: 'scrollin:start'},           
+		    onScrolling:     { overridable: false,  stackEventCallbacks: [], stack: [this.onScrolling],   dispatchOn: 'scroll'},        
 		    onQueueUpdate:   { overridable: false,  stackEventCallbacks: [], stack: [this.onQueueUpdate], dispatchOn: 'scrollin:queueupdate' },        
 		    onInitialized:   { overridable: false,  stackEventCallbacks: [], stack: [this.onInitialized], dispatchOn: 'scrollin:initialized' },  
 		    onStill:         { overridable: true,   stackEventCallbacks: [], stack: [],                   dispatchOn: '' },         	
@@ -316,21 +318,23 @@
 		    template: "", 			       // - markup for new elements
 		    templateEngine: "", 	       // - engine used for markup
 		    fetch: "", 				       // - url where we will be fetching 
-		    debug: "", 				       // - used for development purposes
+		    debug: false, 				       // - used for development purposes
 		    limit: false, 				   // - max number of results to be displayed per page
 		    dataToPass: {}, 		       // - data to be passed a long on each request for each page
-		    scrollSpeed: "", 		       // - 'fast','slow','normal' 
-		    scrollPx: "", 			       // - '40px' additional pixels to be scrolled 
 		    reverse: false, 			   // - Adds results in the reverse direction
-		    animate: "", 			       // - animates elements in 
-		    loading: "", 			       // - 'indicatorImg','indicatorText'
+		    loading: {
+		    	indicatorImg:"",
+		    	indicatorText:""
+		    }, 			       			   // - 'indicatorImg','indicatorText'
 			fillOnLoad: true, 		       // - fills up scroll element with results
 			data: {}, 				       // - pass data to be accessed within each function
 			url: true, 	       			   // - bool or function to update url Ex: #/page/2 or #/<whatever>/{{pageNumber}}/<whatever> 
 			resultHolder: "", 		       // - selector of holder to contain results
 			resultDataAtrr: "",		       // - turn off data attributes
 			triggerfetchpercent: .98,
-			apply: {}
+			axis:"y",
+			apply: {},
+			maxResultSet: false
 		};
 
 		this.metrics = { 
@@ -379,13 +383,15 @@
 		this.options  = Helpers.extend( defaults, options);
 		
 		this.events   = { 
-			initialized: new Event('scrollin:initialized'),
-			scrolling:   new Event('scrollin:scrolling'),
+			initialize:  new Event('scrollin:initialized'),
+			scroll:      new Event('scrollin:scroll'),
 			complete:    new Event('scrollin:complete'),
 			queueupdate: new Event('scrollin:queueupdate'),
-			destroyed:   new Event('scrollin:destroyed'),
-			paused:      new Event('scrollin:paused'),
-			resumed:     new Event('scrollin:resumed') 
+			start:       new Event('scrollin:start'),
+			destroy:     new Event('scrollin:destroy'),
+			pause:       new Event('scrollin:pause'),
+			resume:      new Event('scrollin:resume'),
+			lastset:     new Event('scrollin:lastset')
 		}; 
 		
 		this.errors = { 
@@ -394,12 +400,14 @@
 		};
 		
 		this.state = { 
-			resultSet : 1,
+			resultSet : 0,
 			limit     : this.options.limit,
 			scrolling : false,
 			fetching  : false,
+			start     : false,
 			paused    : false,
-			completed : false
+			completed : false,
+			lastset   : false
 		}; 
 
 		this.getHandlers = function() { 
@@ -428,7 +436,7 @@
 		}
 	
 		this.setResultHolder().updateMetrics().bindHandlers();
-		this.elements[0].dispatchEvent(this.events.initialized);
+		this.elements[0].dispatchEvent(this.events.initialize);
 	});
 	
 	/* ------- Index --------*/ 
@@ -453,7 +461,29 @@
 		switch ( property ) 
 		{
 			case 'start':
-				return this.metrics.scrollTarget.scroll.top === 0;
+				if (this.options.reverse === true) 
+				{
+					return Math.floor(this.metrics.scrollTarget.scroll.percentScrolledY * 100) === 100;
+				}
+				else 
+				{
+					return Math.floor(this.metrics.scrollTarget.scroll.percentScrolledY * 100) === 0;
+				}
+				break;
+
+			case 'end':
+				if (this.options.reverse === true) 
+				{
+					return Math.ceil(this.metrics.scrollTarget.scroll.percentScrolledY * 100) <= 0;
+				}
+				else
+				{
+					return Math.floor(this.metrics.scrollTarget.scroll.percentScrolledY * 100) >= 100;
+				}
+				break;
+
+			case 'lastset':
+				return this.state.lastset;
 				break;
 
 			case 'triggerdistance':
@@ -503,13 +533,15 @@
 
 	Scrollin.prototype.checkAndTrigger = function() { 
 		
-		if (this.at('triggerdistance')) 
+		if (!this.is('completed') && !this.at('lastset') && this.at('triggerdistance')) 
 		{
 			if (!this.state['paused']) { 
 				
 				this.fetch();
 			}
 		}
+
+		return this;
 	}; 
 
 	Scrollin.prototype.updateHash = function() { 
@@ -656,12 +688,30 @@
 		
 		scInstance.updateScrollVelocity().updateMetrics();
 		
-		scInstance.elements[0].dispatchEvent(scInstance.events.scrolling);
+		scInstance.elements[0].dispatchEvent(scInstance.events.scroll);
 		
+		if (scInstance.at('start'))
+		{
+			scInstance.elements[0].dispatchEvent(scInstance.events.start);
+		}
+
+		if (scInstance.at('end') && scInstance.at('lastset'))
+		{
+			scInstance.elements[0].dispatchEvent(scInstance.events.complete);
+		}
+
 		if (!scInstance.is('fetching')) 
 		{ 
 			scInstance.checkAndTrigger();
 		}
+	}; 
+
+	Scrollin.prototype.onLastSet = function( scInstance, event ) {
+		
+		scInstance.state.lastset = true;
+	};
+	
+	Scrollin.prototype.onStart = function( scInstance, evnet ) { 
 	}; 
 
 	Scrollin.prototype.onInitialized = function( scInstance, event ) {
@@ -681,6 +731,11 @@
 		try 
 		{
 			parsedResults = scInstance.applyTemplate( response['results'] );
+
+			if (parsedResults.length === 0)
+			{
+				scInstance.state.completed = true;
+			}
 		}
 		catch(responseParseException)
 		{
@@ -911,11 +966,14 @@
 			}
 		} 
 
-		
-		
 		++this.state.resultSet;
-
 		this.updateMetrics();
+
+		if (this.options.maxResultSet === this.state.resultSet)
+		{
+			this.elements[0].dispatchEvent(this.events.lastset);
+
+		}
 
 		return this;
 	}; 
@@ -1022,20 +1080,20 @@
 
 	Scrollin.prototype.pause = function() { 
 		this.state['paused'] = true;
-		this.elements[0].dispatchEvent(this.events.paused);
+		this.elements[0].dispatchEvent(this.events.pause);
 		return this; 
 	}; 
 
 	Scrollin.prototype.resume = function() { 
 		this.state['paused'] = false;
-		this.elements[0].dispatchEvent(this.events.resumed); 
+		this.elements[0].dispatchEvent(this.events.resume); 
 		this.checkAndTrigger();
 		return this; 
 	}; 
 
 	Scrollin.prototype.destroy = function() { 
 		this.dispatchHandler('onDestroy', this);
-		this.elements[0].dispatchEvent(this.events.destroyed);
+		this.elements[0].dispatchEvent(this.events.destroy);
 	}; 
 
 

@@ -99,7 +99,8 @@
 					fetch: {url:url,dataType:'jsonp'},
 					fillOnLoad: true,
 					limit: 10,
-					reverse: false,
+					maxResultSet: 3,
+					reverse: true,
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
 					template: function( scInstance, result  ) { 
@@ -118,6 +119,15 @@
 						}, 
 						onPause: function() { 
 							addToDebugConsole('Scrollin paused');
+						},
+						onLastSet: function() {
+							addToDebugConsole('Scrollin has loaded the last result set to the DOM.');
+						},
+						onStart: function() {
+							addToDebugConsole('Scrollin has reached the start');
+						},
+						onComplete: function() {
+							addToDebugConsole('Scrollin has reached the end.');
 						}
 					},
 					apply: { 
