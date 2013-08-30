@@ -337,16 +337,15 @@
 		    limit: false, 				   // - max number of results to be displayed per page
 		    dataToPass: {}, 		       // - data to be passed a long on each request for each page
 		    reverse: false, 			   // - Adds results in the reverse direction
-		    loading: {
-		    	indicatorImg:"",
-		    	indicatorText:""
-		    }, 			       			   // - 'indicatorImg','indicatorText'
-			fillOnLoad: true, 		       // - fills up scroll element with results
+		    loading: {},
+		    done: {},
+		    fillOnLoad: true, 		       // - fills up scroll element with results
 			data: {}, 				       // - pass data to be accessed within each function
 			url: true, 	       			   // - bool or function to update url Ex: #/page/2 or #/<whatever>/{{pageNumber}}/<whatever> 
 			resultHolder: "", 		       // - selector of holder to contain results
 			resultDataAtrr: "",		       // - turn off data attributes
 			triggerfetchpercent: .98,
+			delay: false,
 			axis:"y",
 			apply: {},
 			maxResultSet: false
@@ -588,6 +587,68 @@
 		return this; 
 	};
 
+	Scrollin.prototype.loading = function( perform ) {
+
+		var img;
+
+		if (this.options.loading !== undefined && typeof this.options.loading === 'object') 
+		{
+			switch ( perform ) { 
+				
+				case 'hide':
+					
+					// Loading Image
+					if (this.options.loading.img !== undefined && typeof this.options.loading.img === "string") 
+					{
+						if (this.cache.loading.img !== undefined) 
+						{
+							this.elements[0].removeChild( this.cache.loading.img );
+							this.cache.loading.img = undefined;
+						}
+					}
+
+					// Custom Handler
+					else if (this.options.loading.hide !== undefined && typeof this.options.loading.hide === 'function') 
+					{
+						this.options.loading.hide( this );
+					}
+					break;
+
+				case 'show':
+					
+					// Loading Image
+					if (this.options.loading.img !== undefined && typeof this.options.loading.img === "string") 
+					{
+						if (typeof this.cache.loading.img !== "object") 
+						{
+							img = new Image(); 
+							img.src = this.options.loading.img;
+							
+							if(this.options.reverse === true ) 
+							{
+								this.elements[0].insertBefore( img, this.elements[0].firstChild );
+							}
+							else 
+							{
+								this.elements[0].appendChild( img );
+							}
+
+							this.cache.loading.img = img;
+						}
+					}
+
+					// Custom Handler
+					else if (this.options.loading.show !== undefined && typeof this.options.loading.show === 'function') 
+					{
+						this.options.loading.show( this );
+					}
+					break;
+			}
+		}
+
+		return this;
+	}; 
+
 	/* ------ Options ------ */ 
 	Scrollin.prototype.options = {}; 
 
@@ -740,13 +801,15 @@
 	}; 
 
 	Scrollin.prototype.onEnd = function( scInstance, event ) { 
-		if (!scInstance.is('queueempty'))
+		if (!scInstance.is('queueempty') && !scInstance.is('paused'))
 		{
 			scInstance.updateResultHolder();
 		}
 	}; 
 
-	Scrollin.prototype.onCompleted = function( scInstance, event ) { 
+	Scrollin.prototype.onCompleted = function( scInstance, event ) {
+		scInstance.loading('hide');
+		return this; 
 	}; 
 
 	Scrollin.prototype.onInitialized = function( scInstance, event ) {
@@ -880,6 +943,7 @@
 		fetchHandler = function(response) 
 		{
 			that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
+			
 			that.updateResultHolder();
 
 			// Delay setting indicator to prevent multiple requests
@@ -889,6 +953,8 @@
 			{
 				callback( that );
 			}
+
+			that.loading('hide');
 		};
 
 		switch(this.options.fetch.dataType.toLowerCase())
@@ -902,12 +968,17 @@
 				
 				
 
-				if (!this.is('queueempty'))
+				if (!this.is('queueempty') && !this.is('paused'))
 				{
-					that.updateResultHolder();
+					that.loading('show');
+
+					that.updateResultHolder(function() { 
+						that.loading('hide');
+					});
 				}
 				else 
 				{	
+					that.loading('show');
 					this.state['fetching'] = true; 
 					Helpers.sendJSONP(this.options.fetch.urlWithData,fetchHandler);
 				}
@@ -919,7 +990,7 @@
 	}; 
 
 	/* ------ Results Logic ------ */
-	Scrollin.prototype.updateResultHolder = function() {
+	Scrollin.prototype.updateResultHolder = function( callback ) {
 		
 		var that = this; 
 		var index;
@@ -949,7 +1020,7 @@
 				{ 
 
 					++this.state.resultSet;
-					
+
 					firstInQueue = this.queue.splice(0,1);
 
 					children = Helpers.joinArrays( children, firstInQueue.splice(0, endIndex - children.length) );
@@ -1016,12 +1087,19 @@
 
 										if (imgCount === images.length) 
 										{ 
+
 											that.updateMetrics();
 
 											if (that.options.reverse === true) 
 											{
 												that.elements[0].scrollTop = totalHeight;
 											}
+
+											if (typeof callback === "function") 
+											{
+												callback();
+											}
+
 										}
 
 									};
@@ -1048,7 +1126,13 @@
 			this.elements[0].dispatchEvent(this.events.lastset);
 
 		}
-		console.log(this.queue);
+
+		if (images.length === 0 && typeof callback === "function") 
+		{
+			callback();
+		}
+
+
 		return this;
 	}; 
 
@@ -1102,7 +1186,10 @@
 	}; 	
 
 	/* ------ Cache Logic ------ */ 
-	Scrollin.prototype.cache = {results:[]}; 
+	Scrollin.prototype.cache = {
+		loading : {},
+		results : []
+	}; 
 
 	Scrollin.prototype.addToLocalStorage = function( key, value, local ) { 
 	}; 

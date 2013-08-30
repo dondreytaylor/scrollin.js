@@ -10,8 +10,8 @@
 			 	overflow: hidden; 
 			 }
 			.viewport { 
-				width: 500px; 
-				height: 500px; 
+				width: 900; 
+				height: 600px; 
 				border:1px solid #ddd; 
 				overflow-y: auto; 
 				margin-bottom:20px; 
@@ -32,7 +32,8 @@
 				list-style-type: none; 
 				 height: 200px; 
 				/*background: green; */
-				margin-bottom: 10px; 
+				margin: 10px 10px;
+				float: left;
 			}
 
 			.semitvisible { 
@@ -98,10 +99,10 @@
 				$viewport.scrollin({
 					fetch: {url:url,dataType:'jsonp'},
 					fillOnLoad: true,
-					limit: {count:100},
-					maxResultSet: 3,
-					reverse: false,
-					delay: 1000,
+					limit: {count:10},
+					//maxResultSet: 3,
+					reverse: true,
+					//delay: 1000,
 					triggerfetchpercent:.8,
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
