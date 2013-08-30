@@ -251,7 +251,7 @@
 					{
 						if (typeof object[index] === 'object' && object[index]) 
 						{
-							Helpers.urlifyObject( object, returningString );
+							Helpers.urlifyObject( object[index], returningString );
 						}
 						else 
 						{
@@ -264,6 +264,20 @@
 			return returningString;
 		},
 		validateJSONSchema: function(schema, json) { 
+		},
+		joinArrays: function( array1, array2 ) { 
+			
+			var index; 
+
+			if (this.isArray(array1) && this.isArray(array2)) 
+			{
+				for(index in array2) 
+				{
+					array1.push(array2[index]);
+				}
+			}
+
+			return array1; 
 		}
 	};
 
@@ -613,8 +627,8 @@
 
 	Scrollin.prototype.updateLastResultMetrics = function( results ) {
 		
-		console.log( results[0] ); 
-		console.log( typeof results );
+		//console.log( results[0] ); 
+		//console.log( typeof results );
 	}; 
 
 	Scrollin.prototype.updateResultsHolderMetrics = function() {
@@ -726,6 +740,10 @@
 	}; 
 
 	Scrollin.prototype.onEnd = function( scInstance, event ) { 
+		if (!scInstance.is('queueempty'))
+		{
+			scInstance.updateResultHolder();
+		}
 	}; 
 
 	Scrollin.prototype.onCompleted = function( scInstance, event ) { 
@@ -767,9 +785,12 @@
 		
 		if (parsedResponse instanceof Array)
 		{
-			scInstance.cache.results.push(parsedResponse[0]); 
+			if (parsedResponse)
+			{
+				scInstance.cache.results.push(parsedResponse[0]); 
 
-			scInstance.queue.push(parsedResponse[0]);
+				scInstance.queue.push(parsedResponse[0]);
+			}
 
 			scInstance.elements[0].dispatchEvent(scInstance.events.queueupdate);
 		}
@@ -833,19 +854,17 @@
 		var that = this;
 		var handlers; 
 		var urlWithData;
+		var fetchHandler;
 		var dataToPass = typeof this.options.dataToPass === 'function' ? this.options.dataToPass() : this.options.dataToPass; 
 		
 		dataToPass = Helpers.urlifyObject( Helpers.extend( dataToPass, this.getState() ) ); 
 		
-		
-
 		// Set Remote
 		this.options.fetch           = typeof this.options.fetch === 'object' ? this.options.fetch : {url:this.options.fetch};
 		this.options.fetch.url       = typeof this.options.fetch.url === 'string' ? this.options.fetch.url : "";
 		this.options.fetch.dataType  = typeof this.options.fetch.dataType === 'string' ? this.options.fetch.dataType : 'json';
 		
 		
-
 		if (this.options.fetch.url.lastIndexOf('?') === -1)
 		{
 			dataToPass = '?' + dataToPass;
@@ -858,6 +877,20 @@
 		
 		this.options.fetch.urlWithData = this.options.fetch.url + dataToPass;
 		
+		fetchHandler = function(response) 
+		{
+			that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
+			that.updateResultHolder();
+
+			// Delay setting indicator to prevent multiple requests
+			setTimeout(function() { that.state['fetching'] = false; },1000); 
+
+			if (typeof callback === 'function')
+			{
+				callback( that );
+			}
+		};
+
 		switch(this.options.fetch.dataType.toLowerCase())
 		{	
 			// Same Domain
@@ -867,21 +900,17 @@
 			// Cross Domain
 			default:
 				
-				this.state['fetching'] = true; 
+				
 
-				Helpers.sendJSONP(this.options.fetch.urlWithData,function(response) 
+				if (!this.is('queueempty'))
 				{
-					that.dispatchHandler('onQueueUpdate', that, that.dispatchHandler('onParse', that, response) );
 					that.updateResultHolder();
-
-					// Delay setting indicator to prevent multiple requests
-					setTimeout(function() { that.state['fetching'] = false; },1000); 
-
-					if (typeof callback === 'function')
-					{
-						callback( that );
-					}
-				});
+				}
+				else 
+				{	
+					this.state['fetching'] = true; 
+					Helpers.sendJSONP(this.options.fetch.urlWithData,fetchHandler);
+				}
 				break;
 		}
 	}; 
@@ -899,99 +928,127 @@
 		var children;
 		var totalHeight = 0;
 		var childrenElms = [];
+		var firstInQueue; 
+		var startIndex;
+		var endIndex; 
 
 		if (this.at('triggerdistance') || this.at('start')) 
 		{ 
 			if (this.queue.length > 0) 
 			{
-				children = this.queue.pop();
 				
+				firstInQueue = this.queue[0]; 
+
+				startIndex = 0;
 				
-				for(index in children) 
+				endIndex = typeof this.options.limit === 'object' && this.options.limit.count !== undefined ? this.options.limit.count : firstInQueue.length;
+
+				children = firstInQueue.splice(0, endIndex); 
+
+				if (firstInQueue.length === 0) 
 				{ 
+
+					++this.state.resultSet;
 					
-					child = document.createElement('div');
-					child.innerHTML = children[index];
-					child = child.childNodes;
-					childrenElms.push(child[0]);
+					firstInQueue = this.queue.splice(0,1);
+
+					children = Helpers.joinArrays( children, firstInQueue.splice(0, endIndex - children.length) );
 				}
 				
-				this.updateLastResultMetrics( childrenElms ); 
-				
-				this.apply('resultsBefore', childrenElms ); 
-
-				for (index in childrenElms) 
+				if (children !== undefined && children.length > 0) 
 				{
-					this.apply('resultBefore', childrenElms[index], index );
 
-					if (this.options.reverse === true) 
-					{
-						this.options.resultHolder.insertBefore( childrenElms[index], this.options.resultHolder.firstChild );
-					}
-					else
-					{
-						this.options.resultHolder.appendChild( childrenElms[index] );
-					}
-
-					images = childrenElms[index].getElementsByTagName('img'); 
-					
-
-					// Calculate image dimensions
-					(function(resultSet) 
+					for(index in children) 
 					{ 
-						var imgCount = 0; 
-						var img; 
 						
-
-						for(img in images) 
+						child = document.createElement('div');
+						child.innerHTML = children[index];
+						child = child.childNodes;
+						
+						if (child[0] !== undefined)
 						{
-							
-							if (!isNaN(parseInt(img))) 
-							{
-								images[img].onload = function() 
-								{
-									++imgCount;
+							childrenElms.push(child[0]);
+						}
+					}
+					
+					this.updateLastResultMetrics( childrenElms ); 
+					
+					this.apply('resultsBefore', childrenElms ); 
 
-									totalHeight += (
-										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('height')) + 
-										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-top')) + 
-										parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-bottom'))
-									);
-									
+					for (index in childrenElms) 
+					{
+						this.apply('resultBefore', childrenElms[index], index );
 
-									if (imgCount === images.length) 
-									{ 
-										that.updateMetrics();
-
-										if (that.options.reverse === true) 
-										{
-											that.elements[0].scrollTop = totalHeight;
-										}
-									}
-
-								};
-							};
+						if (this.options.reverse === true) 
+						{
+							this.options.resultHolder.insertBefore( childrenElms[index], this.options.resultHolder.firstChild );
+						}
+						else
+						{
+							this.options.resultHolder.appendChild( childrenElms[index] );
 						}
 
-					})(this.state.resultSet);
+						images = childrenElms[index].getElementsByTagName('img'); 
+						
+
+						// Calculate image dimensions
+						(function(resultSet) 
+						{ 
+							var imgCount = 0; 
+							var img; 
+							
+
+							for(img in images) 
+							{
+								
+								if (!isNaN(parseInt(img))) 
+								{
+									images[img].onload = function() 
+									{
+										++imgCount;
+
+										totalHeight += (
+											parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('height')) + 
+											parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-top')) + 
+											parseInt(window.getComputedStyle( childrenElms[index], null).getPropertyValue('margin-bottom'))
+										);
+										
+
+										if (imgCount === images.length) 
+										{ 
+											that.updateMetrics();
+
+											if (that.options.reverse === true) 
+											{
+												that.elements[0].scrollTop = totalHeight;
+											}
+										}
+
+									};
+								};
+							}
+
+						})(this.state.resultSet);
 
 
-					this.apply('resultAfter', this.options.resultHolder.lastChild, index );
+						this.apply('resultAfter', this.options.resultHolder.lastChild, index );
+					}
+
+					this.apply('resultsAfter', childrenElms );
+
+					this.updateMetrics();
 				}
-
-				this.apply('resultsAfter', childrenElms );
 			}
 		} 
 
-		++this.state.resultSet;
-		this.updateMetrics();
+		
 
 		if (this.options.maxResultSet === this.state.resultSet)
 		{
 			this.elements[0].dispatchEvent(this.events.lastset);
 
 		}
-
+		console.log(this.queue);
 		return this;
 	}; 
 
@@ -1058,6 +1115,10 @@
 		
 		switch (state)
 		{
+			case 'queueempty':
+				return (this.queue.length === 0 || this.queue[this.queue.length-1].length === 0);
+				break;
+
 			case 'fetching':
 				return this.state.fetching;
 				break;

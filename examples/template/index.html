@@ -98,9 +98,9 @@
 				$viewport.scrollin({
 					fetch: {url:url,dataType:'jsonp'},
 					fillOnLoad: true,
-					limit: 10,
+					limit: {count:80},
 					maxResultSet: 3,
-					reverse: false,
+					reverse: true,
 					resultHolder: $viewport.find('ul').get(0),
 					templateEngine: dust,
 					template: function( scInstance, result  ) { 
